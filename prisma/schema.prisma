@@ -8,52 +8,52 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   name      String
-  email     String   @unique
+  email     String    @unique
   password  String
-  role      UserRole // "CUSTOMER" ou "SELLER"
-  sales     Sale[]   @relation("SellerSales")   // vendas que o usuário é vendedor
-  purchases Sale[]   @relation("CustomerPurchases") // vendas que o usuário é cliente
-  products  Product[] // produtos cadastrados pelo vendedor
-}
-
-enum UserRole {
-  CUSTOMER
-  SELLER
+  role      UserRole
+  products  Product[]
+  purchases Sale[]    @relation("CustomerPurchases")
+  sales     Sale[]    @relation("SellerSales")
 }
 
 model Product {
-  id          Int      @id @default(autoincrement())
+  id          Int           @id @default(autoincrement())
   title       String
   description String
   price       Float
   stock       Int
   photos      String[]
   sellerId    Int
-  seller      User     @relation(fields: [sellerId], references: [id])
+  seller      User          @relation(fields: [sellerId], references: [id])
   sales       SaleProduct[]
 }
 
 model Sale {
-  id         Int          @id @default(autoincrement())
+  id         Int           @id @default(autoincrement())
   customerId Int
   sellerId   Int
-  customer   User         @relation("CustomerPurchases", fields: [customerId], references: [id])
-  seller     User         @relation("SellerSales", fields: [sellerId], references: [id])
-  products   SaleProduct[]
   total      Float
-  status     SaleStatus   @default(PENDING)
-  createdAt  DateTime     @default(now())
+  status     SaleStatus    @default(PENDING)
+  createdAt  DateTime      @default(now())
+  customer   User          @relation("CustomerPurchases", fields: [customerId], references: [id])
+  seller     User          @relation("SellerSales", fields: [sellerId], references: [id])
+  products   SaleProduct[]
 }
 
 model SaleProduct {
-  id         Int      @id @default(autoincrement())
-  saleId     Int
-  productId  Int
-  quantity   Int
-  sale       Sale     @relation(fields: [saleId], references: [id])
-  product    Product  @relation(fields: [productId], references: [id])
+  id        Int     @id @default(autoincrement())
+  saleId    Int
+  productId Int
+  quantity  Int
+  product   Product @relation(fields: [productId], references: [id])
+  sale      Sale    @relation(fields: [saleId], references: [id])
+}
+
+enum UserRole {
+  CUSTOMER
+  SELLER
 }
 
 enum SaleStatus {
