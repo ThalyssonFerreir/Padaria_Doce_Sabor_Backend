@@ -10,7 +10,6 @@ CREATE TABLE "public"."User" (
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
-    "age" INTEGER,
     "role" "public"."UserRole" NOT NULL,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
