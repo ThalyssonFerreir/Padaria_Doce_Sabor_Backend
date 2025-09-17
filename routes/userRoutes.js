@@ -12,14 +12,14 @@ const prisma = new PrismaClient();
  * Rota de Cadastro: POST /api/usuarios
  */
 router.post('/', async (req, res) => {
-  const { nome, email, senha } = req.body;
+  const { name, email, password } = req.body;
 
-  if (!nome || !email || !senha) {
+  if (!name || !email || !password) {
     return res.status(400).json({ error: 'Por favor, preencha todos os campos.' });
   }
 
   try {
-    const userExists = await prisma.usuario.findUnique({
+    const userExists = await prisma.user.findUnique({
       where: { email },
     });
 
@@ -29,18 +29,18 @@ router.post('/', async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(senha, 10);
 
-    const novoUsuario = await prisma.usuario.create({
+    const newUser = await prisma.user.create({
       data: {
-        nome,
+        name,
         email,
-        senha: hashedPassword,
+        password: hashedPassword,
       },
     });
 
-    novoUsuario.senha = undefined; // Remove a senha da resposta
+    newUser.password = undefined; // Remove a senha da resposta
 
     // Se tudo deu certo, envia a resposta de sucesso
-    return res.status(201).json(novoUsuario);
+    return res.status(201).json(newUser);
 
   } catch (error) {
     console.error("Erro ao criar usuário:", error); // Log do erro no terminal
@@ -52,30 +52,30 @@ router.post('/', async (req, res) => {
  * Rota de Login: POST /api/usuarios/login
  */
 router.post('/login', async (req, res) => {
-  const { email, senha } = req.body;
+  const { email, password } = req.body;
 
   if (!email || !senha) {
     return res.status(400).json({ error: 'Por favor, forneça email e senha.' });
   }
 
   try {
-    const usuario = await prisma.usuario.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({ where: { email } });
 
-    if (!usuario || !(await bcrypt.compare(senha, usuario.senha))) {
+    if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(401).json({ error: 'Credenciais inválidas.' });
     }
 
     const token = jwt.sign(
-      { id: usuario.id, nome: usuario.nome },
+      { id: user.id, name: user.name },
       process.env.JWT_SECRET,
       { expiresIn: '8h' }
     );
 
-    usuario.senha = undefined;
+    user.password = undefined;
 
     return res.json({
       message: "Login bem-sucedido!",
-      usuario,
+      user,
       token,
     });
 
