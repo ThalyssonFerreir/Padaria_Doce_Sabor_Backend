@@ -3,8 +3,8 @@ const express = require('express');
 const cors = require('cors');
 
 // Importa as rotas
-const userRoutes = require('./routes/userRoutes');
-const productRoutes = require('./routes/productRoutes'); // <-- ADICIONE ESTA LINHA
+const userRoutes = require('./src/routes/userRoutes');
+const productRoutes = require('./src/routes/productRoutes'); // <-- ADICIONE ESTA LINHA
 
 const app = express();
 const PORT = process.env.PORT || 3000;
