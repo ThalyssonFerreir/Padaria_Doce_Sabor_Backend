@@ -1,17 +1,14 @@
-// routes/userRoutes.js
-
-const express = require('express');
+// controllers/userController.js
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-const router = express.Router();
 const prisma = new PrismaClient();
 
 /**
- * Rota de Cadastro: POST /api/usuarios
+ * Controller de Cadastro
  */
-router.post('/', async (req, res) => {
+const register = async (req, res) => {
   const { name, email, password } = req.body;
 
   if (!name || !email || !password) {
@@ -27,7 +24,7 @@ router.post('/', async (req, res) => {
       return res.status(409).json({ error: 'Este email já está em uso.' });
     }
 
-    const hashedPassword = await bcrypt.hash(senha, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await prisma.user.create({
       data: {
@@ -37,21 +34,20 @@ router.post('/', async (req, res) => {
       },
     });
 
-    newUser.password = undefined; // Remove a senha da resposta
+    // Remove a senha da resposta
+    const { password: _, ...userWithoutPassword } = newUser;
 
-    // Se tudo deu certo, envia a resposta de sucesso
-    return res.status(201).json(newUser);
-
+    return res.status(201).json(userWithoutPassword);
   } catch (error) {
-    console.error("Erro ao criar usuário:", error); // Log do erro no terminal
+    console.error('Erro ao criar usuário:', error);
     return res.status(500).json({ error: 'Ocorreu um erro no servidor.' });
   }
-});
+};
 
 /**
- * Rota de Login: POST /api/usuarios/login
+ * Controller de Login
  */
-router.post('/login', async (req, res) => {
+const login = async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -71,18 +67,18 @@ router.post('/login', async (req, res) => {
       { expiresIn: '8h' }
     );
 
-    user.password = undefined;
+    // Remove a senha antes de devolver
+    const { password: _, ...userWithoutPassword } = user;
 
     return res.json({
-      message: "Login bem-sucedido!",
-      user,
+      message: 'Login bem-sucedido!',
+      user: userWithoutPassword,
       token,
     });
-
   } catch (error) {
-    console.error("Erro no login:", error);
+    console.error('Erro no login:', error);
     return res.status(500).json({ error: 'Ocorreu um erro no servidor.' });
   }
-});
+};
 
-module.exports = router;
+module.exports = { register, login };
