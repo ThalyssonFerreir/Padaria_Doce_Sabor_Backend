@@ -1,10 +1,10 @@
-import { Router } from "express";
-import { postCart, getCart, deleteCart } from "../controllers/cartController.js";
+const express = require('express');
+const { postCart, getCart, deleteCart } = require("../controllers/cartController.js");
 
-const router = Router();
+const router = express.Router();
 
 router.post("/", postCart);
 router.get("/", getCart);
 router.delete("/", deleteCart);
 
-export default router;
+module.exports = router;
