@@ -2,16 +2,31 @@
 
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
+const multer = require('multer');
+const path = require('path');
 
 const router = express.Router();
 const prisma = new PrismaClient();
 
-// CREATE - Cadastrar um novo produto
-router.post('/', async (req, res) => {
-  const { nome, descricao, preco, estoque } = req.body;
+// Configuração do Multer
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'public/uploads/');
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+const upload = multer({ storage: storage });
 
-  if (!nome || preco === undefined || estoque === undefined) {
-    return res.status(400).json({ error: 'Nome, preço e estoque são obrigatórios.' });
+// CREATE - Cadastrar um novo produto
+router.post('/', upload.single('imagem'), async (req, res) => {
+  const { nome, descricao, valor, quantidade, tipo, codigoBarras } = req.body;
+  const imagemUrl = req.file ? req.file.path.replace(/\\/g, "/").replace('public/', '') : null;
+
+  if (!nome || valor === undefined || quantidade === undefined) {
+    return res.status(400).json({ error: 'Nome, valor e quantidade são obrigatórios.' });
   }
 
   try {
@@ -19,12 +34,19 @@ router.post('/', async (req, res) => {
       data: {
         nome,
         descricao,
-        preco: parseFloat(preco),
-        estoque: parseInt(estoque),
+        preco: parseFloat(valor),
+        estoque: parseInt(quantidade),
+        tipo,
+        codigoBarras,
+        imagemUrl,
       },
     });
     res.status(201).json(produto);
   } catch (error) {
+    if (error.code === 'P2002') {
+        return res.status(409).json({ error: 'Código de barras já cadastrado.' });
+    }
+    console.error("Erro ao criar produto:", error);
     res.status(500).json({ error: 'Erro ao criar o produto.' });
   }
 });
@@ -39,27 +61,35 @@ router.get('/', async (req, res) => {
   }
 });
 
-// UPDATE - Atualizar um produto por ID
-router.put('/:id', async (req, res) => {
+// UPDATE - Atualizar um produto por ID (com imagem opcional)
+router.put('/:id', upload.single('imagem'), async (req, res) => {
   const { id } = req.params;
-  const { nome, descricao, preco, estoque } = req.body;
+  const { nome, descricao, valor, quantidade, tipo, codigoBarras } = req.body;
+
+  const dataToUpdate = {
+    nome,
+    descricao,
+    tipo,
+    codigoBarras,
+    preco: valor ? parseFloat(valor) : undefined,
+    estoque: quantidade ? parseInt(quantidade) : undefined,
+  };
+
+  if (req.file) {
+    dataToUpdate.imagemUrl = req.file.path.replace(/\\/g, "/").replace('public/', '');
+  }
 
   try {
     const produto = await prisma.produto.update({
       where: { id: parseInt(id) },
-      data: {
-        nome,
-        descricao,
-        preco: preco ? parseFloat(preco) : undefined,
-        estoque: estoque ? parseInt(estoque) : undefined,
-      },
+      data: dataToUpdate,
     });
     res.json(produto);
   } catch (error) {
-    // P2025 é o código de erro do Prisma para "Registro não encontrado"
     if (error.code === 'P2025') {
       return res.status(404).json({ error: 'Produto não encontrado.' });
     }
+    console.error("Erro ao atualizar produto:", error);
     res.status(500).json({ error: 'Erro ao atualizar o produto.' });
   }
 });
@@ -67,12 +97,10 @@ router.put('/:id', async (req, res) => {
 // DELETE - Excluir um produto por ID
 router.delete('/:id', async (req, res) => {
   const { id } = req.params;
-
   try {
     await prisma.produto.delete({
       where: { id: parseInt(id) },
     });
-    // res.status(204) é para "No Content", uma resposta de sucesso sem corpo.
     res.status(204).send();
   } catch (error) {
     if (error.code === 'P2025') {
