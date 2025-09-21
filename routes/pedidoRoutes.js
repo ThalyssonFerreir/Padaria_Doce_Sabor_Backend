@@ -11,8 +11,8 @@ router.post('/carrinho/adicionar', authMiddleware, async (req, res) => {
     const usuarioId = req.user.id;
 
     try {
-        const produto = await prisma.produto.findUnique({ where: { id: produtoId } });
-        if (!produto || produto.estoque < quantidade) {
+        const produto = await prisma.product.findUnique({ where: { id: produtoId } });
+        if (!produto || produto.stock < quantidade) {
             return res.status(400).json({ error: 'Produto fora de estoque ou indisponível.' });
         }
 
@@ -127,9 +127,9 @@ router.post('/pedidos/finalizar', authMiddleware, async (req, res) => {
 
         const pedido = await prisma.$transaction(async (tx) => {
             for (const item of carrinho.itens) {
-                const produtoDB = await tx.produto.findUnique({ where: { id: item.produtoId } });
-                if (produtoDB.estoque < item.quantidade) {
-                    throw new Error(`Estoque insuficiente para o produto: ${produtoDB.nome}`);
+                const produtoDB = await tx.product.findUnique({ where: { id: item.produtoId } });
+                if (produtoDB.stock < item.quantidade) {
+                    throw new Error(`Estoque insuficiente para o produto: ${produtoDB.name}`);
                 }
             }
             const novoPedido = await tx.pedido.create({
@@ -148,7 +148,7 @@ router.post('/pedidos/finalizar', authMiddleware, async (req, res) => {
             for (const item of carrinho.itens) {
                 await tx.produto.update({
                     where: { id: item.produtoId },
-                    data: { estoque: { decrement: item.quantidade } },
+                    data: { stock: { decrement: item.quantidade } },
                 });
             }
             await tx.itemCarrinho.deleteMany({ where: { carrinhoId: carrinho.id } });
@@ -168,11 +168,11 @@ router.get('/pedidos/vendedor', authMiddleware, async (req, res) => {
         const pedidos = await prisma.pedido.findMany({
             orderBy: { createdAt: 'desc' },
             include: {
-                usuario: { select: { nome: true, email: true } },
+                usuario: { select: { name: true, email: true } },
                 // ADIÇÃO IMPORTANTE: Inclui os itens e os detalhes dos produtos de cada item
                 itens: {
                     include: {
-                        produto: { select: { nome: true } }
+                        produto: { select: { name: true } }
                     }
                 }
             },

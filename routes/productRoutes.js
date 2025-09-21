@@ -30,9 +30,9 @@ router.post('/', upload.single('imagem'), async (req, res) => {
   }
 
   try {
-    const produto = await prisma.produto.create({
+    const produto = await prisma.product.create({
       data: {
-        nome,
+        name,
         descricao,
         preco: parseFloat(valor),
         estoque: parseInt(quantidade),
@@ -54,7 +54,7 @@ router.post('/', upload.single('imagem'), async (req, res) => {
 // READ - Listar todos os produtos
 router.get('/', async (req, res) => {
   try {
-    const produtos = await prisma.produto.findMany();
+    const produtos = await prisma.product.findMany();
     res.json(produtos);
   } catch (error) {
     res.status(500).json({ error: 'Erro ao listar os produtos.' });
@@ -80,7 +80,7 @@ router.put('/:id', upload.single('imagem'), async (req, res) => {
   }
 
   try {
-    const produto = await prisma.produto.update({
+    const produto = await prisma.product.update({
       where: { id: parseInt(id) },
       data: dataToUpdate,
     });
@@ -98,7 +98,7 @@ router.put('/:id', upload.single('imagem'), async (req, res) => {
 router.delete('/:id', async (req, res) => {
   const { id } = req.params;
   try {
-    await prisma.produto.delete({
+    await prisma.product.delete({
       where: { id: parseInt(id) },
     });
     res.status(204).send();

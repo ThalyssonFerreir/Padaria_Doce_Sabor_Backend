@@ -33,14 +33,14 @@ const uploadAvatar = multer({ storage: avatarStorage });
  * Rota de Cadastro de CLIENTE: POST /api/usuarios
  */
 router.post('/', async (req, res) => {
-  const { nome, email, senha } = req.body;
+  const { name, email, password } = req.body;
 
-  if (!nome || !email || !senha) {
+  if (!name || !email || !password) {
     return res.status(400).json({ error: 'Por favor, preencha todos os campos.' });
   }
 
   try {
-    const userExists = await prisma.usuario.findUnique({
+    const userExists = await prisma.user.findUnique({
       where: { email },
     });
 
@@ -48,18 +48,18 @@ router.post('/', async (req, res) => {
       return res.status(409).json({ error: 'Este email já está em uso.' });
     }
 
-    const hashedPassword = await bcrypt.hash(senha, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    const novoUsuario = await prisma.usuario.create({
+    const novoUsuario = await prisma.user.create({
       data: {
-        nome,
+        name,
         email,
-        senha: hashedPassword,
+        password: hashedPassword,
         role: "CLIENTE", // O padrão já faz isso, mas ser explícito é bom
       },
     });
 
-    novoUsuario.senha = undefined;
+    novoUsuario.password = undefined;
     return res.status(201).json(novoUsuario);
 
   } catch (error) {
@@ -72,14 +72,14 @@ router.post('/', async (req, res) => {
  * Rota de Cadastro de VENDEDOR: POST /api/usuarios/vendedor
  */
 router.post('/vendedor', async (req, res) => {
-  const { nome, email, senha } = req.body;
+  const { name, email, password } = req.body;
 
-  if (!nome || !email || !senha) {
+  if (!name || !email || !password) {
     return res.status(400).json({ error: 'Por favor, preencha todos os campos.' });
   }
 
   try {
-    const userExists = await prisma.usuario.findUnique({
+    const userExists = await prisma.user.findUnique({
       where: { email },
     });
 
@@ -87,18 +87,18 @@ router.post('/vendedor', async (req, res) => {
       return res.status(409).json({ error: 'Este email já está em uso.' });
     }
 
-    const hashedPassword = await bcrypt.hash(senha, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    const novoVendedor = await prisma.usuario.create({
+    const novoVendedor = await prisma.user.create({
       data: {
-        nome,
+        name,
         email,
-        senha: hashedPassword,
+        password: hashedPassword,
         role: "VENDEDOR",
       },
     });
 
-    novoVendedor.senha = undefined;
+    novoVendedor.password = undefined;
     return res.status(201).json(novoVendedor);
 
   } catch (error) {
@@ -111,30 +111,30 @@ router.post('/vendedor', async (req, res) => {
  * Rota de Login (qualquer role): POST /api/usuarios/login
  */
 router.post('/login', async (req, res) => {
-  const { email, senha } = req.body;
+  const { email, password } = req.body;
 
-  if (!email || !senha) {
-    return res.status(400).json({ error: 'Por favor, forneça email e senha.' });
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Por favor, forneça email e password.' });
   }
 
   try {
-    const usuario = await prisma.usuario.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({ where: { email } });
 
-    if (!usuario || !(await bcrypt.compare(senha, usuario.senha))) {
+    if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(401).json({ error: 'Credenciais inválidas.' });
     }
 
     const token = jwt.sign(
-      { id: usuario.id, nome: usuario.nome, role: usuario.role },
+      { id: user.id, name: user.name, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: '8h' }
     );
 
-    usuario.senha = undefined;
+    user.password = undefined;
 
     return res.json({
       message: "Login bem-sucedido!",
-      usuario,
+      user,
       token,
     });
 
@@ -158,7 +158,7 @@ router.post(
 
       const avatarUrl = `uploads/avatars/${req.file.filename}`;
 
-      const updatedUser = await prisma.usuario.update({
+      const updatedUser = await prisma.user.update({
         where: { id: req.user.id },
         data: { avatarUrl: avatarUrl },
       });

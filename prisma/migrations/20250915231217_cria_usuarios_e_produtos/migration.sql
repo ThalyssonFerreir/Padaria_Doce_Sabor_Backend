@@ -41,11 +41,11 @@ DROP TYPE "public"."SaleStatus";
 DROP TYPE "public"."UserRole";
 
 -- CreateTable
-CREATE TABLE "public"."Usuario" (
+CREATE TABLE "public"."User" (
     "id" SERIAL NOT NULL,
-    "nome" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
-    "senha" TEXT NOT NULL,
+    "password" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -53,12 +53,12 @@ CREATE TABLE "public"."Usuario" (
 );
 
 -- CreateTable
-CREATE TABLE "public"."Produto" (
+CREATE TABLE "public"."Product" (
     "id" SERIAL NOT NULL,
-    "nome" TEXT NOT NULL,
-    "descricao" TEXT,
-    "preco" DOUBLE PRECISION NOT NULL,
-    "estoque" INTEGER NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT,
+    "price" DOUBLE PRECISION NOT NULL,
+    "stock" INTEGER NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -66,4 +66,4 @@ CREATE TABLE "public"."Produto" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Usuario_email_key" ON "public"."Usuario"("email");
+CREATE UNIQUE INDEX "Usuario_email_key" ON "public"."User"("email");
