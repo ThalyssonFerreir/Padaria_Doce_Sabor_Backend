@@ -8,11 +8,11 @@ const prisma = new PrismaClient();
 // ROTA DE ADICIONAR ITEM AO CARRINHO (LÓGICA REFINADA)
 router.post('/carrinho/adicionar', authMiddleware, async (req, res) => {
     const { produtoId, quantidade } = req.body;
-    const usuarioId = req.user.id;
+    const usuarioId = req.usuario.id;
 
     try {
         const produto = await prisma.product.findUnique({ where: { id: produtoId } });
-        if (!produto || produto.stock < quantidade) {
+        if (!produto || produto.estoque < quantidade) {
             return res.status(400).json({ error: 'Produto fora de estoque ou indisponível.' });
         }
 
@@ -59,7 +59,7 @@ router.post('/carrinho/adicionar', authMiddleware, async (req, res) => {
 
 // GET /carrinho
 router.get('/carrinho', authMiddleware, async (req, res) => {
-    const usuarioId = req.user.id;
+    const usuarioId = req.usuario.id;
     try {
         const carrinho = await prisma.carrinho.findUnique({
             where: { usuarioId },
@@ -73,7 +73,7 @@ router.get('/carrinho', authMiddleware, async (req, res) => {
 // PUT /carrinho/item
 router.put('/carrinho/item', authMiddleware, async (req, res) => {
     const { produtoId, quantidade } = req.body;
-    const usuarioId = req.user.id;
+    const usuarioId = req.usuario.id;
     try {
         if (quantidade <= 0) {
             // Se a quantidade for 0 ou menos, remove o item em vez de dar erro
@@ -96,7 +96,7 @@ router.put('/carrinho/item', authMiddleware, async (req, res) => {
 // DELETE /carrinho/item/:produtoId
 router.delete('/carrinho/item/:produtoId', authMiddleware, async (req, res) => {
     const { produtoId } = req.params;
-    const usuarioId = req.user.id;
+    const usuarioId = req.usuario.id;
     try {
         const carrinho = await prisma.carrinho.findUnique({ where: { usuarioId } });
         if (!carrinho) return res.status(404).json({ error: "Carrinho não encontrado." });
@@ -112,7 +112,7 @@ router.delete('/carrinho/item/:produtoId', authMiddleware, async (req, res) => {
 
 // FINALIZAR a compra
 router.post('/pedidos/finalizar', authMiddleware, async (req, res) => {
-    const usuarioId = req.user.id;
+    const usuarioId = req.usuario.id;
     try {
         const carrinho = await prisma.carrinho.findUnique({
             where: { usuarioId },
@@ -128,8 +128,8 @@ router.post('/pedidos/finalizar', authMiddleware, async (req, res) => {
         const pedido = await prisma.$transaction(async (tx) => {
             for (const item of carrinho.itens) {
                 const produtoDB = await tx.product.findUnique({ where: { id: item.produtoId } });
-                if (produtoDB.stock < item.quantidade) {
-                    throw new Error(`Estoque insuficiente para o produto: ${produtoDB.name}`);
+                if (produtoDB.estoque < item.quantidade) {
+                    throw new Error(`Estoque insuficiente para o produto: ${produtoDB.nome}`);
                 }
             }
             const novoPedido = await tx.pedido.create({
@@ -148,7 +148,7 @@ router.post('/pedidos/finalizar', authMiddleware, async (req, res) => {
             for (const item of carrinho.itens) {
                 await tx.produto.update({
                     where: { id: item.produtoId },
-                    data: { stock: { decrement: item.quantidade } },
+                    data: { estoque: { decrement: item.quantidade } },
                 });
             }
             await tx.itemCarrinho.deleteMany({ where: { carrinhoId: carrinho.id } });
@@ -163,16 +163,16 @@ router.post('/pedidos/finalizar', authMiddleware, async (req, res) => {
 
 // BUSCAR pedidos do VENDEDOR (AGORA INCLUI OS ITENS DO PEDIDO)
 router.get('/pedidos/vendedor', authMiddleware, async (req, res) => {
-    if (req.user.role !== 'VENDEDOR') return res.status(403).json({ error: 'Acesso negado.' });
+    if (req.usuario.role !== 'VENDEDOR') return res.status(403).json({ error: 'Acesso negado.' });
     try {
         const pedidos = await prisma.pedido.findMany({
             orderBy: { createdAt: 'desc' },
             include: {
-                usuario: { select: { name: true, email: true } },
+                usuario: { select: { nome: true, email: true } },
                 // ADIÇÃO IMPORTANTE: Inclui os itens e os detalhes dos produtos de cada item
                 itens: {
                     include: {
-                        produto: { select: { name: true } }
+                        produto: { select: { nome: true } }
                     }
                 }
             },
@@ -185,7 +185,7 @@ router.get('/pedidos/vendedor', authMiddleware, async (req, res) => {
 
 // NOVA ROTA: ATUALIZAR O STATUS DE UM PEDIDO
 router.put('/pedidos/:pedidoId/status', authMiddleware, async (req, res) => {
-    if (req.user.role !== 'VENDEDOR') return res.status(403).json({ error: 'Acesso negado.' });
+    if (req.usuario.role !== 'VENDEDOR') return res.status(403).json({ error: 'Acesso negado.' });
 
     const { pedidoId } = req.params;
     const { status } = req.body;
@@ -212,7 +212,7 @@ router.put('/pedidos/:pedidoId/status', authMiddleware, async (req, res) => {
 
 // BUSCAR pedidos do CLIENTE
 router.get('/pedidos/meus', authMiddleware, async (req, res) => {
-    const usuarioId = req.user.id;
+    const usuarioId = req.usuario.id;
     try {
         const pedidos = await prisma.pedido.findMany({
             where: { usuarioId },

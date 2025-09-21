@@ -1,4 +1,4 @@
-// routes/productRoutes.js
+// routes/produtoRoutes.js
 
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
@@ -13,9 +13,9 @@ const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, 'public/uploads/');
   },
-  filename: function (req, file, cb) {
+  filenome: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    cb(null, file.fieldnome + '-' + uniqueSuffix + path.extnome(file.originalnome));
   }
 });
 const upload = multer({ storage: storage });
@@ -30,9 +30,9 @@ router.post('/', upload.single('imagem'), async (req, res) => {
   }
 
   try {
-    const produto = await prisma.product.create({
+    const produto = await prisma.produto.create({
       data: {
-        name,
+        nome,
         descricao,
         preco: parseFloat(valor),
         estoque: parseInt(quantidade),
@@ -54,7 +54,7 @@ router.post('/', upload.single('imagem'), async (req, res) => {
 // READ - Listar todos os produtos
 router.get('/', async (req, res) => {
   try {
-    const produtos = await prisma.product.findMany();
+    const produtos = await prisma.produto.findMany();
     res.json(produtos);
   } catch (error) {
     res.status(500).json({ error: 'Erro ao listar os produtos.' });
@@ -80,7 +80,7 @@ router.put('/:id', upload.single('imagem'), async (req, res) => {
   }
 
   try {
-    const produto = await prisma.product.update({
+    const produto = await prisma.produto.update({
       where: { id: parseInt(id) },
       data: dataToUpdate,
     });
@@ -98,7 +98,7 @@ router.put('/:id', upload.single('imagem'), async (req, res) => {
 router.delete('/:id', async (req, res) => {
   const { id } = req.params;
   try {
-    await prisma.product.delete({
+    await prisma.produto.delete({
       where: { id: parseInt(id) },
     });
     res.status(204).send();

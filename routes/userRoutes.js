@@ -1,4 +1,4 @@
-// routes/userRoutes.js
+// routes/usuarioRoutes.js
 
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
@@ -11,7 +11,7 @@ const authMiddleware = require('../middleware/auth'); // Importando o middleware
 const router = express.Router();
 const prisma = new PrismaClient();
 
-// Configuração do Multer para armazenamento de avatares
+// Configuração do Multer para armazenomento de avatares
 const avatarStorage = multer.diskStorage({
   destination: function (req, file, cb) {
     // Cria a pasta se não existir (melhoria de robustez)
@@ -22,9 +22,9 @@ const avatarStorage = multer.diskStorage({
     }
     cb(null, dir);
   },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + req.user.id;
-    cb(null, 'avatar-' + uniqueSuffix + path.extname(file.originalname));
+  filenome: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + req.usuario.id;
+    cb(null, 'avatar-' + uniqueSuffix + path.extnome(file.originalnome));
   }
 });
 const uploadAvatar = multer({ storage: avatarStorage });
@@ -33,33 +33,33 @@ const uploadAvatar = multer({ storage: avatarStorage });
  * Rota de Cadastro de CLIENTE: POST /api/usuarios
  */
 router.post('/', async (req, res) => {
-  const { name, email, password } = req.body;
+  const { nome, email, senha } = req.body;
 
-  if (!name || !email || !password) {
+  if (!nome || !email || !senha) {
     return res.status(400).json({ error: 'Por favor, preencha todos os campos.' });
   }
 
   try {
-    const userExists = await prisma.user.findUnique({
+    const usuarioExists = await prisma.usuario.findUnique({
       where: { email },
     });
 
-    if (userExists) {
+    if (usuarioExists) {
       return res.status(409).json({ error: 'Este email já está em uso.' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedsenha = await bcrypt.hash(senha, 10);
 
-    const novoUsuario = await prisma.user.create({
+    const novoUsuario = await prisma.usuario.create({
       data: {
-        name,
+        nome,
         email,
-        password: hashedPassword,
+        senha: hashedsenha,
         role: "CLIENTE", // O padrão já faz isso, mas ser explícito é bom
       },
     });
 
-    novoUsuario.password = undefined;
+    novoUsuario.senha = undefined;
     return res.status(201).json(novoUsuario);
 
   } catch (error) {
@@ -72,33 +72,33 @@ router.post('/', async (req, res) => {
  * Rota de Cadastro de VENDEDOR: POST /api/usuarios/vendedor
  */
 router.post('/vendedor', async (req, res) => {
-  const { name, email, password } = req.body;
+  const { nome, email, senha } = req.body;
 
-  if (!name || !email || !password) {
+  if (!nome || !email || !senha) {
     return res.status(400).json({ error: 'Por favor, preencha todos os campos.' });
   }
 
   try {
-    const userExists = await prisma.user.findUnique({
+    const usuarioExists = await prisma.usuario.findUnique({
       where: { email },
     });
 
-    if (userExists) {
+    if (usuarioExists) {
       return res.status(409).json({ error: 'Este email já está em uso.' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedsenha = await bcrypt.hash(senha, 10);
 
-    const novoVendedor = await prisma.user.create({
+    const novoVendedor = await prisma.usuario.create({
       data: {
-        name,
+        nome,
         email,
-        password: hashedPassword,
+        senha: hashedsenha,
         role: "VENDEDOR",
       },
     });
 
-    novoVendedor.password = undefined;
+    novoVendedor.senha = undefined;
     return res.status(201).json(novoVendedor);
 
   } catch (error) {
@@ -111,30 +111,30 @@ router.post('/vendedor', async (req, res) => {
  * Rota de Login (qualquer role): POST /api/usuarios/login
  */
 router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
+  const { email, senha } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Por favor, forneça email e password.' });
+  if (!email || !senha) {
+    return res.status(400).json({ error: 'Por favor, forneça email e senha.' });
   }
 
   try {
-    const user = await prisma.user.findUnique({ where: { email } });
+    const usuario = await prisma.usuario.findUnique({ where: { email } });
 
-    if (!user || !(await bcrypt.compare(password, user.password))) {
+    if (!usuario || !(await bcrypt.compare(senha, usuario.senha))) {
       return res.status(401).json({ error: 'Credenciais inválidas.' });
     }
 
     const token = jwt.sign(
-      { id: user.id, name: user.name, role: user.role },
+      { id: usuario.id, nome: usuario.nome, role: usuario.role },
       process.env.JWT_SECRET,
       { expiresIn: '8h' }
     );
 
-    user.password = undefined;
+    usuario.senha = undefined;
 
     return res.json({
       message: "Login bem-sucedido!",
-      user,
+      usuario,
       token,
     });
 
@@ -156,16 +156,16 @@ router.post(
         return res.status(400).json({ error: 'Nenhum arquivo enviado.' });
       }
 
-      const avatarUrl = `uploads/avatars/${req.file.filename}`;
+      const avatarUrl = `uploads/avatars/${req.file.filenome}`;
 
-      const updatedUser = await prisma.user.update({
-        where: { id: req.user.id },
+      const updatedusuario = await prisma.usuario.update({
+        where: { id: req.usuario.id },
         data: { avatarUrl: avatarUrl },
       });
 
       res.json({
         message: 'Avatar atualizado com sucesso!',
-        avatarUrl: updatedUser.avatarUrl,
+        avatarUrl: updatedusuario.avatarUrl,
       });
 
     } catch (error) {
