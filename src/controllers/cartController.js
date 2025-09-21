@@ -12,7 +12,7 @@ export const postCart = (req, res) => {
 };
 
 export const getCart = (req, res) => {
-    res.jason(cart);
+    res.json(cart);
 };
 
 export const deleteCart = (req, res) => {

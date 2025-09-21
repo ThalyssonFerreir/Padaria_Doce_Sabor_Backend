@@ -1,12 +1,14 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
+import dotenv from 'dotenv';
+import express from 'express';
+import cors from 'cors';
 
 // Importa as rotas
-const userRoutes = require('./src/routes/userRoutes');
-const productRoutes = require('./src/routes/productRoutes'); // <-- ADICIONE ESTA LINHA
-const saleRoutes = require('./src/Routes/saleRoutes')
-const cartRoutes = require('./src/Routes/cartRoutes')
+import userRoutes  from './src/routes/userRoutes.js';
+import productRoutes  from './src/routes/productRoutes.js'; // <-- ADICIONE ESTA LINHA
+import saleRoutes  from './src/Routes/saleRoutes.js';
+import cartRoutes  from './src/Routes/cartRoutes.js';
+
+dotenv.config()
 
 const app = express();
 const PORT = process.env.PORT || 3000;

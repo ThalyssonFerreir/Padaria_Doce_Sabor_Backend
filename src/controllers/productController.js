@@ -1,12 +1,12 @@
 // controllers/productController.js
-const { PrismaClient } = require('@prisma/client');
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 /**
  * Criar produto
  */
-const createProduct = async (req, res) => {
+export const createProduct = async (req, res) => {
   const { name, description, sale, stock } = req.body;
 
   if (!name || sale === undefined || stock === undefined) {
@@ -32,7 +32,7 @@ const createProduct = async (req, res) => {
 /**
  * Listar todos os produtos
  */
-const getAllProducts = async (req, res) => {
+export const getAllProducts = async (req, res) => {
   try {
     const products = await prisma.product.findMany();
     return res.json(products);
@@ -45,7 +45,7 @@ const getAllProducts = async (req, res) => {
 /**
  * Atualizar produto
  */
-const updateProduct = async (req, res) => {
+export const updateProduct = async (req, res) => {
   const { id } = req.params;
   const { name, description, sale, stock } = req.body;
 
@@ -72,7 +72,7 @@ const updateProduct = async (req, res) => {
 /**
  * Deletar produto
  */
-const deleteProduct = async (req, res) => {
+export const deleteProduct = async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -87,9 +87,3 @@ const deleteProduct = async (req, res) => {
   }
 };
 
-module.exports = {
-  createProduct,
-  getAllProducts,
-  updateProduct,
-  deleteProduct
-};

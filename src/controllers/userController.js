@@ -1,14 +1,14 @@
 // controllers/userController.js
-const { PrismaClient } = require('@prisma/client');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 const prisma = new PrismaClient();
 
 /**
  * Controller de Cadastro
  */
-const register = async (req, res) => {
+export const register = async (req, res) => {
   const { name, email, password } = req.body;
 
   if (!name || !email || !password) {
@@ -31,6 +31,7 @@ const register = async (req, res) => {
         name,
         email,
         password: hashedPassword,
+        role: 'CUSTOMER',
       },
     });
 
@@ -47,7 +48,7 @@ const register = async (req, res) => {
 /**
  * Controller de Login
  */
-const login = async (req, res) => {
+export const login = async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -81,4 +82,3 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { register, login };

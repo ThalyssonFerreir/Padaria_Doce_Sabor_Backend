@@ -1,5 +1,5 @@
-const express = require('express');
-const { postCart, getCart, deleteCart } = require("../controllers/cartController.js");
+import express from 'express';
+import { postCart, getCart, deleteCart } from "../controllers/cartController.js";
 
 const router = express.Router();
 
@@ -7,4 +7,4 @@ router.post("/", postCart);
 router.get("/", getCart);
 router.delete("/", deleteCart);
 
-module.exports = router;
+export default router;
