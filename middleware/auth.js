@@ -13,7 +13,7 @@ module.exports = function (req, res, next) {
     // Verifica o token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     // Adiciona o payload do token (que tem o id do usuário) ao objeto da requisição
-    req.user = decoded;
+    req.usuario = decoded;
     next(); // Passa para a próxima etapa (a rota de upload)
   } catch (ex) {
     res.status(400).json({ error: 'Token inválido.' });

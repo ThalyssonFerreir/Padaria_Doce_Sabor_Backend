@@ -18,10 +18,10 @@ ALTER TABLE "public"."ItemPedido" DROP CONSTRAINT "ItemPedido_produtoId_fkey";
 ALTER TABLE "public"."Pedido" DROP CONSTRAINT "Pedido_usuarioId_fkey";
 
 -- DropTable
-DROP TABLE "public"."Product";
+DROP TABLE "public"."Produto";
 
 -- DropTable
-DROP TABLE "public"."User";
+DROP TABLE "public"."Usuario";
 
 -- CreateTable
 CREATE TABLE "public"."Usuario" (
