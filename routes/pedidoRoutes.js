@@ -11,7 +11,7 @@ router.post('/carrinho/adicionar', authMiddleware, async (req, res) => {
     const usuarioId = req.usuario.id;
 
     try {
-        const produto = await prisma.product.findUnique({ where: { id: produtoId } });
+        const produto = await prisma.produto.findUnique({ where: { id: produtoId } });
         if (!produto || produto.estoque < quantidade) {
             return res.status(400).json({ error: 'Produto fora de estoque ou indisponível.' });
         }
@@ -127,7 +127,7 @@ router.post('/pedidos/finalizar', authMiddleware, async (req, res) => {
 
         const pedido = await prisma.$transaction(async (tx) => {
             for (const item of carrinho.itens) {
-                const produtoDB = await tx.product.findUnique({ where: { id: item.produtoId } });
+                const produtoDB = await tx.produto.findUnique({ where: { id: item.produtoId } });
                 if (produtoDB.estoque < item.quantidade) {
                     throw new Error(`Estoque insuficiente para o produto: ${produtoDB.nome}`);
                 }
