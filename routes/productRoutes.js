@@ -97,10 +97,10 @@ router.put('/:id', upload.single('imagem'), async (req, res) => {
 // DELETE - Excluir um produto por ID
 router.delete('/:id', async (req, res) => {
   const { id } = req.params;
+  const produtoId = parseInt(id);
   try {
-    await prisma.produto.delete({
-      where: { id: parseInt(id) },
-    });
+    await prisma.itemCarrinho.deleteMany({ where: { produtoId } });
+    await prisma.produto.delete({ where: { id: produtoId } });
     res.status(204).send();
   } catch (error) {
     if (error.code === 'P2025') {
