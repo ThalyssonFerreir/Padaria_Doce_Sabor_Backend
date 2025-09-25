@@ -42,8 +42,6 @@ CREATE TABLE "public"."SolicitacaoVendedor" (
     "nome" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "telefone" TEXT,
-    "endereco" TEXT,
-    "descricao" TEXT,
     "status" TEXT NOT NULL DEFAULT 'PENDENTE',
     "codigoAprovacao" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,

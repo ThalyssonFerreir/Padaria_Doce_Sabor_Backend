@@ -80,8 +80,6 @@ model SolicitacaoVendedor {
   nome           String
   email          String   @unique
   telefone       String
-  endereco       String
-  descricao      String
   status         String   @default("PENDENTE") // PENDENTE, APROVADO, REJEITADO
   codigoAprovacao String? 
   createdAt      DateTime @default(now())

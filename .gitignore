@@ -3,6 +3,9 @@ node_modules
 .env
 DATABASE_URL="postgresql://postgres:goronopdu3011@localhost:5432/padaria_doce_sabor?schema=public"
 PORT=3000
-
+JWT_SECRET="goronopdu3011"
+EMAIL_USER="thalyssonferreira133@gmail.com"
+EMAIL_PASS="hxvf rgsi svvw blzp"
+EMAIL_RECEIVER="thalyssonferreira133@gmail.com"
 
 /generated/prisma
