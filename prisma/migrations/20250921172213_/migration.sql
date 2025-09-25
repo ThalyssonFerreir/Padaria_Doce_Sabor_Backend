@@ -37,6 +37,20 @@ CREATE TABLE "public"."Usuario" (
     CONSTRAINT "Usuario_pkey" PRIMARY KEY ("id")
 );
 
+CREATE TABLE "public"."SolicitacaoVendedor" (
+    "id" SERIAL NOT NULL,
+    "nome" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "telefone" TEXT,
+    "endereco" TEXT,
+    "descricao" TEXT,
+    "status" TEXT NOT NULL DEFAULT 'PENDENTE',
+    "codigoAprovacao" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    CONSTRAINT "SolicitacaoVendedor_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateTable
 CREATE TABLE "public"."Produto" (
     "id" SERIAL NOT NULL,

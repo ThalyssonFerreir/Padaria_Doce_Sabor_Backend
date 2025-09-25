@@ -74,3 +74,16 @@ model ItemPedido {
   quantidade  Int
   precoUnitario Float
 }
+
+model SolicitacaoVendedor {
+  id             Int      @id @default(autoincrement())
+  nome           String
+  email          String   @unique
+  telefone       String
+  endereco       String
+  descricao      String
+  status         String   @default("PENDENTE") // PENDENTE, APROVADO, REJEITADO
+  codigoAprovacao String? 
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
