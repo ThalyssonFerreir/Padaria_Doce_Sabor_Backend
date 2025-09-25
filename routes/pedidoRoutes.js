@@ -113,6 +113,7 @@ router.delete('/carrinho/item/:produtoId', authMiddleware, async (req, res) => {
 // FINALIZAR a compra
 router.post('/pedidos/finalizar', authMiddleware, async (req, res) => {
     const usuarioId = req.usuario.id;
+    
     try {
         const carrinho = await prisma.carrinho.findUnique({
             where: { usuarioId },
@@ -157,6 +158,9 @@ router.post('/pedidos/finalizar', authMiddleware, async (req, res) => {
         res.status(201).json({ message: 'Compra finalizada com sucesso!', pedido });
     } catch (error) {
         console.error("Erro ao finalizar compra:", error);
+        if (error.message && error.message.startsWith("Estoque insuficiente")) {
+            return res.status(400).json({ error: error.message });
+        }
         res.status(500).json({ error: error.message || 'Erro ao finalizar a compra.' });
     }
 });
